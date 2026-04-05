@@ -19,11 +19,11 @@ module.exports = async (req, res) => {
     if (typeof body === 'string') {
       body = JSON.parse(body);
     }
-    const { action, email, password, name } = body;
+    const { action, email, password, name, role } = body;
 
     // Rekisteröityminen
     if (action === 'register') {
-      if (!email || !password || !name) {
+      if (!email || !password || !name || !role) {
         return res.status(400).json({ success: false, message: 'Puuttuvia tietoja.' });
       }
       if (password.length < 6) {
@@ -35,12 +35,12 @@ module.exports = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Käyttäjä on jo olemassa.' });
       }
       
-      const newUser = await insertUser(name, email, password);
+      const newUser = await insertUser({ name, email, password, role });
       
       return res.status(200).json({
         success: true,
         token: `token-${newUser.id}`,
-        user: { name: newUser.name, email: newUser.email }
+        user: { name: newUser.name, email: newUser.email, role: newUser.role }
       });
     }
     
@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({
           success: true,
           token: `token-${user.id}`,
-          user: { name: user.name, email: user.email }
+          user: { name: user.name, email: user.email, role: user.role }
         });
       }
       

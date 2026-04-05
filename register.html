@@ -57,6 +57,12 @@
         <div class="form-group">
           <label>Salasana (väh. 6 merkkiä)</label>
           <input type="password" id="password" placeholder="••••••••" required minlength="6">
+        <div class="form-group">
+          <label>Mitä etsit?</label>
+          <select id="role" style="width: 100%; padding: 14px 16px; border-radius: var(--border-radius-medium); border: 1px solid var(--bg-tertiary); font-family: inherit; font-size: 1rem; background: transparent;">
+            <option value="parent">Haluan varata hoitajia perheelle</option>
+            <option value="caretaker">Haluan tarjota asiantuntijahoitoa</option>
+          </select>
         </div>
         <p id="errorMsg" class="error-tag"></p>
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Rekisteröidy</button>
@@ -75,10 +81,11 @@
       const n = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const pwd = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
       const btn = this.querySelector('button[type="submit"]');
       btn.textContent = 'Lasketaan...';
       
-      const res = await registerUser(n, email, pwd);
+      const res = await registerUser(n, email, pwd, role);
       if(res.success) {
         window.location.href = 'dashboard.html';
       } else {

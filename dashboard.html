@@ -11,7 +11,6 @@
     .dash-title { margin-bottom: 0.5rem; }
     
     .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
-    
     .card { background: var(--bg-primary); border-radius: var(--border-radius-large); padding: 2rem; box-shadow: var(--shadow-subtle); margin-bottom: 2rem; }
     .card h3 { margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--bg-tertiary); padding-bottom: 1rem; }
     
@@ -26,8 +25,14 @@
     .booking-details p { color: var(--text-secondary); font-size: 0.95rem; }
     
     .status { padding: 4px 12px; border-radius: var(--border-radius-pill); font-size: 0.85rem; font-weight: 500; }
-    .status.confirmed { background: rgba(52, 199, 89, 0.1); color: var(--success-color); }
+    .status.pending { background: rgba(255, 149, 0, 0.1); color: #ff9500; }
     
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.95rem; }
+    .form-group input, .form-group textarea, .form-group select { 
+      width: 100%; padding: 12px; border-radius: var(--border-radius-medium);
+      border: 1px solid var(--bg-tertiary); font-family: inherit; font-size: 1rem;
+    }
     @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -37,66 +42,32 @@
   <header class="navbar">
     <a href="index.html" class="logo">VIP.Care</a>
     <nav class="nav-links">
-      <a href="index.html" class="link">Löydä Hoitaja</a>
+      <a href="index.html" class="link">Etusivu</a>
       <button class="btn btn-outline nav-cta" style="padding: 8px 16px;" onclick="logoutUser()">Kirjaudu ulos</button>
     </nav>
   </header>
 
   <div class="dash-header">
     <div class="container">
-      <h1 class="dash-title" id="welcomeMsg">Tervetuloa Omat Sivut -näkymään</h1>
-      <p style="color: var(--text-secondary);">Täällä hallinnoit perheesi hoitovarauksia ja asetuksia.</p>
+      <h1 class="dash-title" id="welcomeMsg">Ladataan...</h1>
+      <p style="color: var(--text-secondary);" id="roleText">Haetaan tietoja palvelimelta.</p>
     </div>
   </div>
 
-  <div class="container grid-2">
-    <!-- Main Content -->
+  <div class="container grid-2" id="mainGrid" style="display: none;">
+    <!-- Vasen Kolumni (Varaukset kummallekin roolille) -->
     <div>
       <div class="card">
-        <h3>Tulevat Varaukset</h3>
-        <div class="booking-list">
-          
-          <div class="booking-item">
-            <div class="booking-date">
-              <div class="day">12</div>
-              <div class="month">Touko</div>
-            </div>
-            <div style="flex: 1;">
-              <h4>Mikko L. (Musiikkipedagogi)</h4>
-              <p>Tiistai klo 16:00 - 19:00</p>
-            </div>
-            <div><span class="status confirmed">Vahvistettu</span></div>
-          </div>
-          
-          <div class="booking-item">
-            <div class="booking-date">
-              <div class="day">28</div>
-              <div class="month">Touko</div>
-            </div>
-            <div style="flex: 1;">
-              <h4>Anna K. (Askartelumestari)</h4>
-              <p>Keskiviikko klo 17:00 - 20:00</p>
-            </div>
-            <div><span class="status confirmed">Vahvistettu</span></div>
-          </div>
-
+        <h3 id="bookingsTitle">Varaukset</h3>
+        <div class="booking-list" id="bookingsList">
+            <p style="color: var(--text-secondary);">Haetaan varauksia...</p>
         </div>
       </div>
     </div>
     
-    <!-- Sidebar -->
-    <div>
-      <div class="card">
-        <h3>Etsi uutta hoitajaa?</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">Löydä upea tekijä viikonlopulle verkkohakemistostamme.</p>
-        <a href="index.html" class="btn btn-primary" style="width: 100%;">Siirry hakuun</a>
-      </div>
-      
-      <div class="card">
-        <h3>Asiakaspalvelu</h3>
-        <p style="color: var(--text-secondary); font-size: 0.95rem;">Tarvitsetko apua varauksen perumisessa? Olemme täällä teitä varten.</p>
-        <button class="btn btn-outline" style="width: 100%; margin-top: 1.5rem;">Ota yhteyttä</button>
-      </div>
+    <!-- Oikea Kolumni (Sivupaneeli) -->
+    <div id="sidebarArea">
+      <!-- Ladataan dynaamisesti JS:n kautta riippuen roolista -->
     </div>
   </div>
 
@@ -105,10 +76,134 @@
     if (!isAuthenticated()) {
       window.location.href = 'login.html';
     } else {
+      loadDashboard();
+    }
+    
+    async function loadDashboard() {
       const u = getUserData();
-      if(u) {
-        document.getElementById('welcomeMsg').textContent = `Tervetuloa, ${u.name.split(' ')[0]}`;
+      document.getElementById('welcomeMsg').textContent = `Tervetuloa, ${u.name.split(' ')[0]}`;
+      
+      try {
+        const res = await fetch(`/api/user?email=${u.email}`);
+        const data = await res.json();
+        
+        document.getElementById('mainGrid').style.display = 'grid';
+        
+        if (data.user.role === 'caretaker') {
+            document.getElementById('roleText').textContent = 'Olet rekisteröitynyt Asiantuntijana.';
+            document.getElementById('bookingsTitle').textContent = 'Vastaanotetut Työtarjoukset';
+            buildCaretakerSidebar(data.user);
+        } else {
+            document.getElementById('roleText').textContent = 'Täällä hallinnoit perheesi hoitovarauksia.';
+            document.getElementById('bookingsTitle').textContent = 'Tulevat Varaukset';
+            buildParentSidebar();
+        }
+        
+        renderBookings(data.bookings, data.user.role);
+        
+      } catch(err) {
+        document.getElementById('bookingsList').innerHTML = '<p style="color:red;">Virhe ladattaessa tietoja. Ajathan koodia Vercelissä?</p>';
       }
+    }
+    
+    function renderBookings(bookings, role) {
+        const list = document.getElementById('bookingsList');
+        if (!bookings || bookings.length === 0) {
+            list.innerHTML = `<p style="color: var(--text-secondary);">Ei aktiivisia varauksia.</p>`;
+            return;
+        }
+        
+        list.innerHTML = '';
+        bookings.forEach(b => {
+             // Puretaan keksitty päivä
+             const dispEmail = role === 'caretaker' ? b.parent_email : b.caretaker_email;
+             const cardHTML = `
+              <div class="booking-item">
+                <div class="booking-date">
+                  <div class="day">📆</div>
+                  <div class="month">Uusi</div>
+                </div>
+                <div class="booking-details">
+                  <h4>Yhteyshenkilö: ${dispEmail.split('@')[0]}</h4>
+                  <p>Pyydetty aika: ${b.date_booking}</p>
+                </div>
+                <div><span class="status pending">Odottaa</span></div>
+              </div>
+             `;
+             list.insertAdjacentHTML('beforeend', cardHTML);
+        });
+    }
+
+    function buildParentSidebar() {
+        const sidebar = document.getElementById('sidebarArea');
+        sidebar.innerHTML = `
+          <div class="card">
+            <h3>Etsi uutta hoitajaa?</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">Löydä alueesi parhaat asiantuntijat.</p>
+            <a href="index.html" class="btn btn-primary" style="width: 100%;">Siirry hakuun</a>
+          </div>
+        `;
+    }
+    
+    function buildCaretakerSidebar(user) {
+        const sidebar = document.getElementById('sidebarArea');
+        sidebar.innerHTML = `
+          <div class="card">
+            <h3>Julkinen Profiilisi</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Nämä tiedot näkyvät perheille haussa.</p>
+            
+            <form id="profileForm">
+              <div class="form-group">
+                <label>Palvelurooli</label>
+                <select id="s_role">
+                    <option value="Perushoito" ${user.service_role==='Perushoito'?'selected':''}>VIP Perushoito</option>
+                    <option value="Askartelu" ${user.service_role==='Askartelu'?'selected':''}>Askartelumestari</option>
+                    <option value="Musiikki" ${user.service_role==='Musiikki'?'selected':''}>Musiikkipedagogi</option>
+                    <option value="Uinti" ${user.service_role==='Uinti'?'selected':''}>Uintiopetus</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tuntihinta (€/h)</label>
+                <input type="text" id="s_price" value="${user.price || '25€/h'}">
+              </div>
+              <div class="form-group">
+                <label>Profiili Emoji / Kuva</label>
+                <input type="text" id="s_avatar" value="${user.avatar || '👩🏻'}">
+              </div>
+              <div class="form-group">
+                <label>Esittelyteksti</label>
+                <textarea id="s_desc" rows="3">${user.description || ''}</textarea>
+              </div>
+              
+              <button type="submit" class="btn btn-primary" style="width:100%;">Tallenna muutokset</button>
+              <p id="saveMsg" style="margin-top: 10px; font-size: 0.9rem; color: green; display: none;">Tallennettu onnistuneesti!</p>
+            </form>
+          </div>
+        `;
+        
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.textContent = 'Tallennetaan...';
+            
+            const payload = {
+                email: user.email,
+                service_role: document.getElementById('s_role').value,
+                price: document.getElementById('s_price').value,
+                avatar: document.getElementById('s_avatar').value,
+                description: document.getElementById('s_desc').value
+            };
+            
+            await fetch('/api/user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            btn.textContent = 'Tallenna muutokset';
+            document.getElementById('saveMsg').style.display = 'block';
+            setTimeout(()=> { document.getElementById('saveMsg').style.display='none'; }, 3000);
+        });
     }
   </script>
 </body>

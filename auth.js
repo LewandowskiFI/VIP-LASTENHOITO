@@ -9,12 +9,12 @@ function getUserData() {
     return data ? JSON.parse(data) : null;
 }
 
-async function registerUser(name, email, password) {
+async function registerUser(name, email, password, role = 'parent') {
     try {
         const response = await fetch('/api/auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'register', name, email, password })
+            body: JSON.stringify({ action: 'register', name, email, password, role })
         });
         const data = await response.json();
         

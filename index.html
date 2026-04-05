@@ -79,12 +79,20 @@
     </div>
   </section>
 
-  <!-- Apple-tyylinen Modal (Demo-ikkuna) -->
+  <!-- Tyylikäs Varaus-Modal -->
   <div id="demoModal" class="modal-overlay">
     <div class="modal-card">
       <h3 id="modalTitle">Otsikko</h3>
       <p id="modalDesc">Kuvaus</p>
-      <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="closeModal()">Selvä, sulje ikkuna</button>
+      
+      <div id="bookingSection" style="margin-top: 1.5rem; display: none; padding-top: 1rem; border-top: 1px solid var(--bg-tertiary);">
+        <label style="display:block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Milloin tarvitset hoitajaa?</label>
+        <input type="text" id="bookDate" placeholder="esim. Huomenna klo 14:00" style="width: 100%; padding: 12px; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--bg-tertiary);">
+        <button class="btn btn-primary" style="width: 100%; background-color: var(--success-color);" onclick="submitBooking()">Varaa Hoitaja Nyt</button>
+      </div>
+
+      <p id="bookError" style="color: red; font-size: 0.9rem; display: none; margin-top: 10px;"></p>
+      <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="closeModal()">Sulje</button>
     </div>
   </div>
 

@@ -20,10 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalTitle = document.getElementById('modalTitle');
   const modalDesc = document.getElementById('modalDesc');
   
-  function openModal(title, desc) {
+  let currentCaretakerEmail = null;
+
+  function openModal(title, desc, caretakerEmail) {
     if(!modalOverlay) return;
     modalTitle.textContent = title;
     modalDesc.textContent = desc;
+    currentCaretakerEmail = caretakerEmail;
+    
+    const u = typeof getUserData === 'function' ? getUserData() : null;
+    const bSec = document.getElementById('bookingSection');
+    
+    if (u && u.role !== 'caretaker' && caretakerEmail) {
+      bSec.style.display = 'block';
+    } else {
+      bSec.style.display = 'none';
+      if (!u) {
+          modalDesc.innerHTML += `<br><br><a href="login.html" style="color:var(--accent-color);font-weight:bold;">Kirjaudu sisään varataksesi.</a>`;
+      }
+    }
+    
+    document.getElementById('bookError').style.display = 'none';
     modalOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -88,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="profile-desc">${p.description}</p>
             <div class="price-row">
               <div class="price">${p.price}</div>
-              <button class="btn btn-outline" style="padding: 8px 16px;" onclick="openModal('${p.name}', '${p.description} Hinta on ${p.price}. Kirjaudu sisään varataksesi tarkan ajan.')">Näytä profiili</button>
+              <button class="btn btn-outline" style="padding: 8px 16px;" onclick="openModal('${p.name}', '${p.description}', '${p.email}')">Näytä profiili</button>
             </div>
         </div>
       `;
@@ -131,4 +148,37 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('roleFilter').value = 'Kaikki';
     document.getElementById('searchInput').value = '';
     filterProfiles();
+  }
+
+  async function submitBooking() {
+    const parent = getUserData();
+    const cEmail = currentCaretakerEmail;
+    const dateInput = document.getElementById('bookDate').value;
+    const err = document.getElementById('bookError');
+    
+    if (!parent || !cEmail) return;
+    if (!dateInput) {
+        err.style.display = 'block';
+        err.textContent = 'Kirjoita haluttu aika / Pvm.';
+        return;
+    }
+    
+    try {
+        const btn = document.querySelector('#bookingSection button.btn-primary');
+        btn.textContent = 'Lähetetään...';
+        
+        await fetch('/api/book', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentEmail: parent.email, caretakerEmail: cEmail, dateBooking: dateInput })
+        });
+        
+        closeModal();
+        alert('Varauspyyntö lähetetty onnistuneesti! Voit seurata sitä Omat Sivut -paneelista.');
+        btn.textContent = 'Varaa Hoitaja Nyt';
+        document.getElementById('bookDate').value = '';
+    } catch(e) {
+        err.style.display = 'block';
+        err.textContent = 'Virhe varauksessa.';
+    }
   }
