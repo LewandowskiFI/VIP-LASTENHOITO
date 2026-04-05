@@ -9,8 +9,21 @@ module.exports = async (req, res) => {
       if (!email) return res.status(400).json({ error: 'Email puuttuu' });
       
       const rows = await queryUsers(email);
-      const user = rows[0];
-      if (!user) return res.status(404).json({ error: 'Käyttäjää ei löydy' });
+      let user = rows[0];
+      
+      // Korjaus Vercelin serverless-arkkitehtuurin muistinmenetyksiin (in-memory demo-tilassa)
+      if (!user && !process.env.POSTGRES_URL) {
+          user = { 
+              email: email, 
+              name: req.query.name || email.split('@')[0], 
+              role: req.query.role || 'parent',
+              avatar: '👤',
+              price: '25€/h',
+              service_role: 'Perushoito'
+          };
+      } else if (!user) {
+          return res.status(404).json({ error: 'Käyttäjää ei löydy' });
+      }
       
       const bookings = await getUserBookings(email, user.role);
       

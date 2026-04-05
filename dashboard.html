@@ -84,9 +84,11 @@
       document.getElementById('welcomeMsg').textContent = `Tervetuloa, ${u.name.split(' ')[0]}`;
       
       try {
-        const res = await fetch(`/api/user?email=${u.email}`);
+        const res = await fetch(`/api/user?email=${u.email}&role=${u.role}&name=${encodeURIComponent(u.name)}`);
         const data = await res.json();
         
+        if (data.error) throw new Error(data.error);
+
         document.getElementById('mainGrid').style.display = 'grid';
         
         if (data.user.role === 'caretaker') {
