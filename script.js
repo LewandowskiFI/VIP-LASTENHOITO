@@ -87,9 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const isVerified = p.verified ? `<span class="badge verified">✓ Taustatarkistettu</span>` : '';
       
       const cardHTML = `
-        <div class="profile-card" data-role="${p.role}">
+        <div class="profile-card" data-role="${p.service_role}">
             <div class="profile-header">
-              <div class="avatar">${p.avatar}</div>
+              <div class="avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                ${p.avatar && p.avatar.startsWith('data:') ? `<img src="${p.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : p.avatar}
+              </div>
               <div class="profile-info">
                 <h3>${p.name}</h3>
                 <div class="rating">
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="badge-row">
               ${isVerified}
-              <span class="badge">${p.avatar} ${p.roleName}</span>
+              <span class="badge">${p.avatar && p.avatar.startsWith('data:') ? '📸' : p.avatar} ${p.service_role}</span>
             </div>
             <p class="profile-desc">${p.description}</p>
             <div class="price-row">

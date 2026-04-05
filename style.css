@@ -7,8 +7,8 @@
   --text-primary: #1d1d1f;
   --text-secondary: #86868b;
   
-  --accent-color: #007aff;
-  --accent-hover: #0056b3;
+  --accent-color: #e995ba;
+  --accent-hover: #d185a6;
   --star-color: #f5a623;
   --success-color: #34c759;
 
@@ -57,12 +57,7 @@ ul { list-style-type: none; }
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--accent-color);
-}
+.logo { font-size: 2.2rem; font-weight: 700; color: var(--accent-color); letter-spacing: -0.5px; font-family: 'Brush Script MT', 'Dancing Script', 'Pacifico', cursive; }
 
 .nav-links {
   display: flex;
