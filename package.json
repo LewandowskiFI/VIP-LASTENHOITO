@@ -1,0 +1,11 @@
+{
+  "name": "vip-care-app",
+  "version": "1.0.0",
+  "description": "Vercel Full-Stack Architecture",
+  "scripts": {
+    "start": "node api/profiles.js"
+  },
+  "dependencies": {
+    "@vercel/postgres": "^0.8.0"
+  }
+}

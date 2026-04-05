@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
       allProfiles = await response.json();
       renderProfiles(allProfiles);
     } catch (err) {
-      grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ff3b30;"><b>Demotila-ilmoitus:</b> Koska ajat sivustoa paikallisesti `http.server`-komennolla ilman Vercelin tukea, Node.js rajapintoja ei pystytä suorittamaan koneellasi. Lataa kansio Verceliin, jolloin haku toimii teknisesti täydellisesti!</p>';
+    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ff3b30;"><b>Tietokantayhteys katkesi:</b> Varmista, että olet julkaissut sovelluksen Vercelissä. Paikallinen kehityspalvelin ei tue Node.js rajapintoja.</p>';
     }
   }
   
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="profile-desc">${p.description}</p>
             <div class="price-row">
               <div class="price">${p.price}</div>
-              <button class="btn btn-outline" style="padding: 8px 16px;" onclick="openModal('${p.name} Profiili', 'Tässä demo-versiossa tarkempi profiilinäkymä on lukittu. Rekisteröidy nähdäksesi lisää.')">Näytä profiili</button>
+              <button class="btn btn-outline" style="padding: 8px 16px;" onclick="openModal('${p.name}', '${p.description} Hinta on ${p.price}. Kirjaudu sisään varataksesi tarkan ajan.')">Näytä profiili</button>
             </div>
         </div>
       `;
