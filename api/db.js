@@ -47,6 +47,7 @@ async function initDB() {
 
 async function queryUsers(email) {
   if (process.env.POSTGRES_URL) {
+    await initDB();
     const { rows } = await sql`SELECT * FROM users WHERE email = ${email}`;
     return rows;
   }
@@ -55,6 +56,7 @@ async function queryUsers(email) {
 
 async function getCaretakers() {
   if (process.env.POSTGRES_URL) {
+    await initDB();
     const { rows } = await sql`SELECT * FROM users WHERE role = 'caretaker'`;
     return rows;
   }
@@ -80,6 +82,7 @@ async function insertUser(userData) {
 
 async function updateUser(email, updates) {
   if (process.env.POSTGRES_URL) {
+    await initDB();
     await sql`
       UPDATE users 
       SET description = ${updates.description}, price = ${updates.price}, avatar = ${updates.avatar}, service_role = ${updates.service_role}
@@ -107,6 +110,7 @@ async function createBooking(parentEmail, caretakerEmail, dateBooking) {
 
 async function getUserBookings(email, role) {
   if (process.env.POSTGRES_URL) {
+    await initDB();
     const { rows } = await sql`SELECT * FROM bookings WHERE parent_email = ${email} OR caretaker_email = ${email}`;
     return rows;
   }
